@@ -6,6 +6,8 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from numpy.typing import NDArray
 
+from config import LANDMARK_COORD_SHAPE
+
 
 def get_cat_image_paths(parent_dir: str | os.PathLike) -> list[str]:
     if not os.path.isdir(parent_dir):
@@ -31,7 +33,6 @@ def load_landmark_coord(path: str | os.PathLike) -> NDArray[np.int_]:
     with open(path, "r") as f:
         line = f.readline()
         split_line = line.strip().split(" ")
-        print(split_line)
         coordinate_list = [int(c) for c in split_line]
         if len(coordinate_list) != 19 or coordinate_list[0] != 9:
             raise Exception(f"Landmark path {path} is not formatted as expected")
@@ -49,10 +50,22 @@ def display_landmark_cat_image(image_path: str | os.PathLike):
     plt.show()
 
 
+def normalize_landmark_coordinates(coord: NDArray[np.int_], size_x: int, size_y: int) -> NDArray[np.floating]:
+    if coord.shape != LANDMARK_COORD_SHAPE:
+        raise ValueError(f"Landmark coord shape {coord} is not formatted as expected")
+    normalized_coord = np.zeros(LANDMARK_COORD_SHAPE)
+    normalized_coord[:, 0] = coord[:, 0] / size_x
+    normalized_coord[:, 1] = coord[:, 1] / size_y
+    return normalized_coord
+
+
 def check_data_integrity(path: str | os.PathLike) -> bool:
     try:
-        load_raw_rgb_image(path)
-        load_landmark_coord(path)
+        image = load_raw_rgb_image(path)
+        coord = load_landmark_coord(get_landmark_coord_path(path))
+        size_x, size_y = image.size
+        if any(x < 0 or y < 0 or x > size_x or y > size_y for x, y in coord):
+            raise ValueError("Invalid coordinates")
         return True
-    except:
+    except Exception as e:
         return False
