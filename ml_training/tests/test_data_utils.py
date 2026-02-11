@@ -3,7 +3,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from data.utils import get_cat_image_paths, get_landmark_coord_path, load_raw_rgb_image, load_landmark_coord
+from config import LANDMARK_COORD_SHAPE
+from data.utils import get_cat_image_paths, get_landmark_coord_path, load_raw_rgb_image, load_landmark_coord, \
+    normalize_landmark_coordinates
 
 
 def test_get_cat_image_paths_finds_jpg_files(tmp_path):
@@ -48,7 +50,7 @@ def test_get_landmark_coord_path(tmp_path):
 def test_load_raw_rgb_image(sample_image_path):
     image = load_raw_rgb_image(sample_image_path)
     with pytest.raises(FileNotFoundError):
-        load_raw_rgb_image(sample_image_path / "some_image.jpg")
+        load_raw_rgb_image(str(sample_image_path) + "_")
     assert image.size == (100, 200)
 
 
@@ -70,3 +72,17 @@ def test_load_landmark_coord(tmp_path):
         with pytest.raises(Exception):
             load_landmark_coord(coord_file)
     assert (load_landmark_coord(coord_tmp_files[-1]) == valid_coordinate_tuples).all()
+
+
+def test_normalize_landmark_coordinates():
+    landmark_coordinates = np.array([50] * 18).reshape(LANDMARK_COORD_SHAPE)
+    axis_sizes = [100, 200, 300, 400, 500]
+    correct_results = [0.5, 0.25, 1 / 6, 0.125, 0.1]
+    with pytest.raises(ValueError):
+        normalize_landmark_coordinates(landmark_coordinates[:, 0], 100, 100)
+    for result_x, size_x in zip(correct_results, axis_sizes):
+        for result_y, size_y in zip(correct_results, axis_sizes):
+            normalized_coord = normalize_landmark_coordinates(landmark_coordinates, size_x, size_y)
+            assert normalized_coord.shape == LANDMARK_COORD_SHAPE
+            assert np.allclose(normalized_coord[:, 0], result_x)
+            assert np.allclose(normalized_coord[:, 1], result_y)
