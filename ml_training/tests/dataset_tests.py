@@ -7,7 +7,7 @@ import torch
 from config import LANDMARK_COORD_SHAPE
 from data.dataset import CatLandmarkDataset
 from data.utils import normalize_landmark_coordinates
-from utils import create_valid_data_point_files, create_random_coordinates
+from utils import create_valid_data_point_file, create_random_coordinates
 
 
 class TestCatLandmarkDataset:
@@ -28,12 +28,12 @@ class TestCatLandmarkDataset:
         invalid_coordinates.append([1000] + valid_paths[:17])
 
         for path, size in zip(valid_paths_0, sizes_img):
-            create_valid_data_point_files(str(tmp_path / path), size)
+            create_valid_data_point_file(str(tmp_path / path), size)
 
         for path, size, coord in zip(valid_paths_1[:len(invalid_coordinates)],
                                      sizes_img[:len(invalid_coordinates)],
                                      invalid_coordinates):
-            create_valid_data_point_files(str(tmp_path / path), size, coord)
+            create_valid_data_point_file(str(tmp_path / path), size, coord)
 
         return CatLandmarkDataset(str(tmp_path))
 

@@ -3,12 +3,11 @@ import random
 from typing import Literal
 
 import torch
-from numpy.typing import NDArray
 from torch.utils.data import Dataset
 import torchvision.transforms as T
 
 from data.utils import get_cat_image_paths, check_data_integrity, load_raw_rgb_image, get_landmark_coord_path, \
-    normalize_landmark_coordinates, load_landmark_coord
+    normalize_landmark_coordinates, load_landmark_coord, rescale_image
 
 TRAIN_RATIO = 0.7
 VALIDATION_RATIO = 0.15
@@ -63,7 +62,8 @@ class CatLandmarkDataset(Dataset):
         landmark_path = get_landmark_coord_path(path_str)
 
         raw_image = load_raw_rgb_image(path_str)
-        image_tensor = T.ToTensor()(raw_image)
+        rescaled_image = rescale_image(raw_image)
+        image_tensor = T.ToTensor()(rescaled_image)
 
         landmark_array = load_landmark_coord(landmark_path)
         norm_landmark_array = normalize_landmark_coordinates(landmark_array, *raw_image.size)
