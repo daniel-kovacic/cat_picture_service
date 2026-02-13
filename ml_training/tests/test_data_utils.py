@@ -2,10 +2,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from PIL import Image
 
-from config import LANDMARK_COORD_SHAPE
+from config import LANDMARK_COORD_SHAPE, IMAGE_SHAPE
 from data.utils import get_cat_image_paths, get_landmark_coord_path, load_raw_rgb_image, load_landmark_coord, \
-    normalize_landmark_coordinates
+    normalize_landmark_coordinates, rescale_image
 
 
 def test_get_cat_image_paths_finds_jpg_files(tmp_path):
@@ -45,6 +46,15 @@ def test_get_landmark_coord_path(tmp_path):
     for path in incorrect_paths:
         with pytest.raises(FileNotFoundError):
             get_landmark_coord_path(path)
+
+
+def test_rescale_image():
+    image_sizes = [(100, 200), (50, 50), (20, 30), (100, 50)]
+
+    for x_size, y_size in image_sizes:
+        img = Image.new("RGB", (x_size, y_size))
+        img_rescaled = rescale_image(img)
+        assert img_rescaled.size == IMAGE_SHAPE
 
 
 def test_load_raw_rgb_image(sample_image_path):
