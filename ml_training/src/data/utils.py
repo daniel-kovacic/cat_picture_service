@@ -6,7 +6,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from numpy.typing import NDArray
 
-from config import LANDMARK_COORD_SHAPE
+from config import LANDMARK_COORD_SHAPE, IMAGE_SHAPE
 
 
 def get_cat_image_paths(parent_dir: str | os.PathLike) -> list[str]:
@@ -56,7 +56,11 @@ def normalize_landmark_coordinates(coord: NDArray[np.int_], size_x: int, size_y:
     normalized_coord = np.zeros(LANDMARK_COORD_SHAPE)
     normalized_coord[:, 0] = coord[:, 0] / size_x
     normalized_coord[:, 1] = coord[:, 1] / size_y
-    return normalized_coord
+    return normalized_coord.astype(np.float32)
+
+
+def rescale_image(image: Image.Image) -> Image.Image:
+    return image.resize(IMAGE_SHAPE)
 
 
 def check_data_integrity(path: str | os.PathLike) -> bool:
