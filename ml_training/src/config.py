@@ -1,3 +1,5 @@
+from pathlib import Path
+
 LANDMARK_INDEX_DICT = {
     0: "left_eye",
     1: "right_eye",
@@ -13,3 +15,6 @@ LANDMARK_INDEX_DICT = {
 LANDMARK_COORD_SHAPE = (9, 2)
 
 IMAGE_SHAPE = (224, 224)
+
+MODEL_REGISTRY_PATH = Path(__file__).resolve().parent.parent.parent.joinpath("model_registry").resolve()
+DATA_DIR = Path(__file__).resolve().parent.parent.joinpath("data").joinpath("raw").resolve()
