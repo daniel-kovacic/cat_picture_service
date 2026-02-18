@@ -4,10 +4,9 @@ from typing import Literal
 
 import torch
 from torch.utils.data import Dataset
-import torchvision.transforms as T
 
 from data.utils import get_cat_image_paths, check_data_integrity, load_raw_rgb_image, get_landmark_coord_path, \
-    normalize_landmark_coordinates, load_landmark_coord, rescale_image
+    normalize_landmark_coordinates, load_landmark_coord, rescale_image, image_to_tensor
 
 TRAIN_RATIO = 0.7
 VALIDATION_RATIO = 0.15
@@ -17,7 +16,6 @@ class CatLandmarkDataset(Dataset):
 
     def _remove_corrupted_data(self):
         self.path_list = [p for p in self.path_list if check_data_integrity(p)]
-        print(self.path_list)
 
     def _shuffle_data(self):
         random.shuffle(self.path_list)
@@ -52,7 +50,6 @@ class CatLandmarkDataset(Dataset):
 
         self._shuffle_data()
         self._split_dataset()
-        print(len(self.path_list))
 
     def __len__(self) -> int:
         return len(self.path_list)
@@ -62,8 +59,7 @@ class CatLandmarkDataset(Dataset):
         landmark_path = get_landmark_coord_path(path_str)
 
         raw_image = load_raw_rgb_image(path_str)
-        rescaled_image = rescale_image(raw_image)
-        image_tensor = T.ToTensor()(rescaled_image)
+        image_tensor = image_to_tensor(raw_image)
 
         landmark_array = load_landmark_coord(landmark_path)
         norm_landmark_array = normalize_landmark_coordinates(landmark_array, *raw_image.size)

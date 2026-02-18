@@ -1,15 +1,15 @@
 import torch
-import numpy as np
-from numpy.typing import NDArray
-
-from config import LANDMARK_COORD_SHAPE
 
 
-def avg_dist(pred: NDArray, target: NDArray):
-    sum_dist = np.linalg.norm(pred - target, axis=2).sum()
-    avg_dist = sum_dist / LANDMARK_COORD_SHAPE[0]
-    return avg_dist
+def avg_dist(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    per_landmark_dist = torch.linalg.norm(pred - target, dim=2)
+
+    per_sample_avg = per_landmark_dist.mean(dim=1)
+
+    return per_sample_avg.mean()
 
 
-def mse(pred: NDArray, target: NDArray):
-    return np.mean((pred - target) ** 2)
+def mse(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    per_sample_mse = ((pred - target) ** 2).mean(dim=(1, 2))
+
+    return per_sample_mse.mean()

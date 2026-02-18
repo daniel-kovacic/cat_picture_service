@@ -23,13 +23,10 @@ class TestModelTrainer:
         train_loader = model_trainer.train_loader
         model = model_trainer.model
         x, y = next(iter(train_loader))
-        print("x_shape: ", x.shape)
-        print("y_shape: ", y.shape)
 
         with torch.no_grad():
             y_hat = model(x)
 
-        print(y_hat.shape)
         train_output = model_trainer.train_step(x, y)
         assert "loss" in train_output and "prediction" in train_output and "target" in train_output
         assert y_hat.shape == train_output["prediction"].shape

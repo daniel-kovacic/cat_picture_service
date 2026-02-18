@@ -2,9 +2,11 @@ import os
 from pathlib import Path
 
 import numpy as np
+import torch
 from PIL import Image
 import matplotlib.pyplot as plt
 from numpy.typing import NDArray
+import torchvision.transforms as T
 
 from config import LANDMARK_COORD_SHAPE, IMAGE_SHAPE
 
@@ -41,10 +43,14 @@ def load_landmark_coord(path: str | os.PathLike) -> NDArray[np.int_]:
         return coordinates
 
 
-def display_landmark_cat_image(image_path: str | os.PathLike):
+def display_landmark_cat_image_from_path(image_path: str | os.PathLike):
     landmark_path = get_landmark_coord_path(image_path)
     landmarks = load_landmark_coord(landmark_path)
     cat_image = load_raw_rgb_image(image_path)
+    display_landmark_cat_image(cat_image, landmarks)
+
+
+def display_landmark_cat_image(cat_image: Image.Image, landmarks: np.ndarray):
     plt.imshow(cat_image)
     plt.scatter(landmarks[:, 0], landmarks[:, 1])
     plt.show()
@@ -73,3 +79,18 @@ def check_data_integrity(path: str | os.PathLike) -> bool:
         return True
     except Exception as e:
         return False
+
+
+def image_to_tensor(raw_image: Image.Image) -> torch.Tensor:
+    rescaled_image = rescale_image(raw_image)
+    image_tensor = T.ToTensor()(rescaled_image)
+    return image_tensor
+
+
+def normalized_coord_to_original_coord(coord, image_shape) -> NDArray[np.floating]:
+    rescaled_coords = np.zeros(LANDMARK_COORD_SHAPE)
+    print(coord)
+    print(image_shape)
+    rescaled_coords[:, 0] = coord[0, :, 0] * image_shape[0]
+    rescaled_coords[:, 1] = coord[0, :, 1] * image_shape[1]
+    return rescaled_coords
