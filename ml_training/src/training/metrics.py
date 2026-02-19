@@ -1,4 +1,5 @@
 import torch
+from torch.nn import MSELoss
 
 
 def avg_dist(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
@@ -10,6 +11,4 @@ def avg_dist(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
 
 
 def mse(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-    per_sample_mse = ((pred - target) ** 2).mean(dim=(1, 2))
-
-    return per_sample_mse.mean()
+    return MSELoss()(pred, target)

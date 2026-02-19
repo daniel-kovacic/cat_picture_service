@@ -55,5 +55,5 @@ def create_valid_data_point_files(path: Path, nmbr_of_files: int, base_file_path
 
 def create_data_loader(path: Path,
                        split: Literal["train", "val", "test"] | list[Literal["train", "val", "test"]] = None):
-    DataLoader = torch.utils.data.DataLoader(CatLandmarkDataset(path, split=split))
-    return DataLoader
+    data_loader = torch.utils.data.DataLoader(CatLandmarkDataset(path, split=split))
+    return data_loader

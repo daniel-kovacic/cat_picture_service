@@ -1,18 +1,11 @@
-import json
-from pathlib import Path
-from typing import Literal
-
-import torch
 import tqdm
-from fontTools.ufoLib import DATA_DIRNAME
 from torch import nn
 from torch.nn import MSELoss
 from torch.optim import Adam, Optimizer
-from torch.utils.data import DataLoader
 
 from config import LANDMARK_COORD_SHAPE, DATA_DIR
 from data.dataset import CatLandmarkDataset
-from models.model import ResNetModel
+from data.dataset_heatmap import CatLandmarkHeatmapDataset
 from training.model_checkpointer import ModelCheckpointer
 from training.parameter_configs import parameter_configs
 from training.trainer import ResNetModelTrainer
@@ -38,9 +31,12 @@ def main():
     optimizer_name = hyperparameters["optimizer"]
     epochs = hyperparameters["epochs"]
     criterion = parameter_config["criterion"]
-    train_dataset = CatLandmarkDataset(DATA_DIR, "train")
-    val_dataset = CatLandmarkDataset(DATA_DIR, "val")
-
+    if model_name == "resnet18":
+        train_dataset = CatLandmarkDataset(DATA_DIR, "train")
+        val_dataset = CatLandmarkDataset(DATA_DIR, "val")
+    elif model_name == "resnet18_heatmap":
+        train_dataset = CatLandmarkHeatmapDataset(DATA_DIR, "train")
+        val_dataset = CatLandmarkHeatmapDataset(DATA_DIR, "val")
     optimizer = pick_optimizer(optimizer=optimizer_name, learning_rate=lr, model=model)
     trainer = ResNetModelTrainer(model=model,
                                  optimizer=optimizer,

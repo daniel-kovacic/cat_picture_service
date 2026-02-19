@@ -89,8 +89,11 @@ def image_to_tensor(raw_image: Image.Image) -> torch.Tensor:
 
 def normalized_coord_to_original_coord(coord, image_shape) -> NDArray[np.floating]:
     rescaled_coords = np.zeros(LANDMARK_COORD_SHAPE)
-    print(coord)
-    print(image_shape)
     rescaled_coords[:, 0] = coord[0, :, 0] * image_shape[0]
     rescaled_coords[:, 1] = coord[0, :, 1] * image_shape[1]
     return rescaled_coords
+
+
+def landmarks_to_rescaled_landmarks(landmarks: np.ndarray, sizes) -> np.ndarray:
+    bigger_idx = sizes[0] >= sizes[1]
+    smaller_idx = 1 - bigger_idx
