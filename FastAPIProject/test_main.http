@@ -1,0 +1,49 @@
+# Test your FastAPI endpoints
+
+GET http://127.0.0.1:8000/
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/hello/User
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/annotate
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="cat3.jpg"
+Content-Type: image/jpeg
+
+< /Users/daniel/Projects/cat_picture_service/FastAPIProject/data/cat9.jpg
+
+--WebAppBoundary
+###
+
+POST http://127.0.0.1:8000/crop
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="cat1.jpg"
+Content-Type: image/jpeg
+
+< /Users/daniel/Projects/cat_picture_service/FastAPIProject/data/cat5.jpg
+
+--WebAppBoundary
+###
+
+###
+
+POST http://127.0.0.1:8000/align_face
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< /Users/daniel/Projects/cat_picture_service/FastAPIProject/data/cat8.jpg
+
+--WebAppBoundary
+###
