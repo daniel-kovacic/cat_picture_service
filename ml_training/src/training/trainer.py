@@ -22,6 +22,7 @@ class ResNetModelTrainer:
             batch_size: int = 32,
             shuffle: bool = True,
             num_workers: int = 0,
+            use_lbls_for_training: bool = False,
             metrics: Dict[str, MetricFn] | None = None
     ) -> None:
         if torch.cuda.is_available():
@@ -37,6 +38,7 @@ class ResNetModelTrainer:
         self.optimizer: torch.optim.Optimizer = optimizer
         self.criterion: nn.Module = criterion
 
+        self.use_lbls_for_training = use_lbls_for_training
         use_cuda: bool = self.device.type == "cuda"
         use_mps: bool = self.device.type == "mps"
 
@@ -72,8 +74,11 @@ class ResNetModelTrainer:
 
         self.model.train()
         self.optimizer.zero_grad()
+        if not self.use_lbls_for_training:
+            y_hat: torch.Tensor = self.model(batch_x)
+        else:
+            y_hat: torch.Tensor = self.model(batch_x, batch_y)
 
-        y_hat: torch.Tensor = self.model(batch_x)
         loss: torch.Tensor = self.criterion(y_hat, batch_y)
 
         loss.backward()
@@ -83,7 +88,6 @@ class ResNetModelTrainer:
 
     def validate(self) -> Dict[str, float]:
         self.model.eval()
-        metric_results: Dict[str, list[float]] = defaultdict(list)
         total_pts: int = 0
 
         metric_sums = {name: torch.zeros((), device=self.device)
@@ -94,8 +98,10 @@ class ResNetModelTrainer:
                 x = x.to(self.device, non_blocking=False)
                 y = y.to(self.device, non_blocking=False)
                 batch_size = x.shape[0]
-
-                y_hat: torch.Tensor = self.model(x)
+                if not self.use_lbls_for_training:
+                    y_hat: torch.Tensor = self.model(x)
+                else:
+                    y_hat: torch.Tensor = self.model(x, y)
                 for name, metric in self.metrics.items():
                     res = metric(y_hat, y)
                     metric_sums[name] += res * batch_size

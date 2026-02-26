@@ -16,5 +16,9 @@ LANDMARK_COORD_SHAPE = (9, 2)
 
 IMAGE_SHAPE = (224, 224)
 
+CAT_ID_CLASSES = 564
+
 MODEL_REGISTRY_PATH = Path(__file__).resolve().parent.parent.parent.joinpath("model_registry").resolve()
 DATA_DIR = Path(__file__).resolve().parent.parent.joinpath("data").joinpath("raw").resolve()
+DATA_DIR_ID_CATS = Path(__file__).resolve().parent.parent.joinpath("data").joinpath(
+    "cat_individuals_dataset_preprocessed_v2").resolve()
