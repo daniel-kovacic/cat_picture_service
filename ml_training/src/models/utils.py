@@ -8,9 +8,8 @@ from models.model import ResNetModel
 from training.trainer import ResNetModelTrainer
 
 
-def load_best_model(checkpoint_str: str, model=ResNetModel):
+def load_best_model(path: str, model=ResNetModel):
     model_path = "model.pt"
-    path = os.path.join(MODEL_REGISTRY_PATH, checkpoint_str)
     path = os.path.join(path, model_path)
     state_dict = torch.load(path, map_location=torch.device("cpu"))
     model = model(LANDMARK_COORD_SHAPE)

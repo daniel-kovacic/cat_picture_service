@@ -1,0 +1,1 @@
+{"run_id": "20260218-172424", "model_name": "resnet18_heatmap", "evaluation_metric": "mse", "metrics": {"mse": 0.00032621537684462965}, "iteration": 33, "timestamp": "20260218-181043"}

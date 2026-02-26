@@ -8,7 +8,7 @@ import numpy as np
 from PIL import Image
 import cv2
 
-from config import IMAGE_SHAPE
+from config import IMAGE_SHAPE, LANDMARK_MODEL_PATH
 from data.utils import load_raw_rgb_image
 from models.model import ResNetModel
 from models.model_heatmap import ResNetHeatmap
@@ -22,7 +22,6 @@ RELATIVE_PADDING_X = (0.7, 0.7)
 RELATIVE_PADDING_Y = (1.5, 0.4)
 IMAGE_SIZE = (224, 224)
 PEAK_THRESHOLD = 0.52
-MODEL_CHECKPOINT_NAME = "20260218-172424"
 
 
 def sensible_landmarks(landmarks: NDArray) -> bool:
@@ -102,9 +101,8 @@ def process_directory_tree(
     src_root = Path(src_root)
     dst_root = Path(dst_root)
     model_type = "heatmap"
-    model_checkpoint_str = MODEL_CHECKPOINT_NAME
     model = load_best_model(
-        model_checkpoint_str,
+        LANDMARK_MODEL_PATH,
         model=ResNetModel if model_type == "landmark" else ResNetHeatmap
     )
     subdirs = [p for p in src_root.iterdir() if p.is_dir()]

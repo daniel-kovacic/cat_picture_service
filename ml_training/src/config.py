@@ -22,3 +22,7 @@ MODEL_REGISTRY_PATH = Path(__file__).resolve().parent.parent.parent.joinpath("mo
 DATA_DIR = Path(__file__).resolve().parent.parent.joinpath("data").joinpath("raw").resolve()
 DATA_DIR_ID_CATS = Path(__file__).resolve().parent.parent.joinpath("data").joinpath(
     "cat_individuals_dataset_preprocessed_v2").resolve()
+LANDMARK_MODEL_PATH = Path(__file__).resolve().parent.parent.parent.joinpath("models").joinpath(
+    "landmark_model").resolve()
+FACE_ID_MODEL_PATH = Path(__file__).resolve().parent.parent.parent.joinpath("models").joinpath(
+    "face_id_model").resolve()

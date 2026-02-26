@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-from core.config import Model_ID
 from models.model_singleton import ModelSingleton
 from services import annotation_service, face_cropping_service, cat_alignment_service
 
