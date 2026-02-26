@@ -24,6 +24,8 @@ class CatLandmarkDataset(Dataset):
         self.path_list = get_cat_image_paths(data_dir)
         self.seed = seed
         self.split = split
+        if self.split is None:
+            self.split = ["train", "val", "test"]
 
         self._remove_corrupted_data()
 
