@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 import torch
@@ -16,6 +17,19 @@ def get_cat_image_paths(parent_dir: str | os.PathLike) -> list[str]:
         raise Exception(f"Parent dir {parent_dir} is not a directory")
     paths = [str(p) for p in Path(parent_dir).glob("**/*.jpg")]
     return paths
+
+
+def get_labeled_individual_cat_paths(parent_dir: str | os.PathLike) -> list[tuple[str, int]]:
+    if not os.path.isdir(parent_dir):
+        raise Exception(f"Parent dir {parent_dir} is not a directory")
+    root_dir = Path(parent_dir)
+    subdirs = [d for d in root_dir.iterdir() if d.is_dir()]
+    print(subdirs)
+    subdirs_sorted = sorted(subdirs, key=lambda d: d.name)
+    directory_label_dict = {p: l for l, p in enumerate(subdirs_sorted)}
+    labeled_data = [(str(p), l) for dir_path, l in directory_label_dict.items() for p in dir_path.iterdir() if
+                    p.is_file()]
+    return labeled_data
 
 
 def get_landmark_coord_path(image_path: str | os.PathLike) -> str:
@@ -94,6 +108,21 @@ def normalized_coord_to_original_coord(coord, image_shape) -> NDArray[np.floatin
     return rescaled_coords
 
 
-def landmarks_to_rescaled_landmarks(landmarks: np.ndarray, sizes) -> np.ndarray:
-    bigger_idx = sizes[0] >= sizes[1]
-    smaller_idx = 1 - bigger_idx
+def _get_split_indices(data_size: int, train_ratio: float, val_ratio: float) -> tuple[int, int]:
+    return int(data_size * train_ratio), int(data_size * (train_ratio + val_ratio))
+
+
+def split_dataset(data_list: list,
+                  split: Literal["train", "val", "test"] | list[Literal["train", "val", "test"]],
+                  train_ratio: float,
+                  val_ratio: float,
+                  ):
+    val_idx, test_idx = _get_split_indices(len(data_list), train_ratio, val_ratio)
+    index_dict = {'train': (None, val_idx), 'val': (val_idx, test_idx), 'test': (test_idx, None)}
+    splits = split if type(split) != str else [split]
+    data = []
+    for split in splits:
+        if not split in index_dict:
+            raise ValueError(f'Split {split} does not exist')
+        data.extend(data_list[index_dict[split][0]:index_dict[split][1]])
+    return data

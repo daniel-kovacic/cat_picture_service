@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import Dataset
 
 from data.utils import get_cat_image_paths, check_data_integrity, load_raw_rgb_image, get_landmark_coord_path, \
-    normalize_landmark_coordinates, load_landmark_coord, rescale_image, image_to_tensor
+    normalize_landmark_coordinates, load_landmark_coord, image_to_tensor, split_dataset
 
 TRAIN_RATIO = 0.7
 VALIDATION_RATIO = 0.15
@@ -17,26 +17,6 @@ class CatLandmarkDataset(Dataset):
     def _remove_corrupted_data(self):
         self.path_list = [p for p in self.path_list if check_data_integrity(p)]
 
-    def _shuffle_data(self):
-        random.shuffle(self.path_list)
-
-    def _get_split_indices(self) -> tuple[int, int]:
-        l = len(self.path_list)
-        return int(l * TRAIN_RATIO), int(l * (TRAIN_RATIO + VALIDATION_RATIO))
-
-    def _split_dataset(self):
-        if self.split is None:
-            self.split = ["train", "val", "test"]
-        val_idx, test_idx = self._get_split_indices()
-        index_dict = {'train': (None, val_idx), 'val': (val_idx, test_idx), 'test': (test_idx, None)}
-        splits = self.split if type(self.split) != str else [self.split]
-        data = []
-        for split in splits:
-            if not split in index_dict:
-                raise ValueError(f'Split {split} does not exist')
-            data.extend(self.path_list[index_dict[split][0]:index_dict[split][1]])
-        self.path_list = data
-
     def __init__(self,
                  data_dir: str | os.PathLike,
                  split: Literal["train", "val", "test"] | list[Literal["train", "val", "test"]] = None,
@@ -45,11 +25,12 @@ class CatLandmarkDataset(Dataset):
         self.seed = seed
         self.split = split
 
-        random.seed(self.seed)
         self._remove_corrupted_data()
 
-        self._shuffle_data()
-        self._split_dataset()
+        random.seed(self.seed)
+        random.shuffle(self.path_list)
+
+        self.path_list = split_dataset(self.path_list, self.split, TRAIN_RATIO, VALIDATION_RATIO)
 
     def __len__(self) -> int:
         return len(self.path_list)
