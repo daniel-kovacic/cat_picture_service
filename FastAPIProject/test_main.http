@@ -1,15 +1,4 @@
-# Test your FastAPI endpoints
-
-GET http://127.0.0.1:8000/
-Accept: application/json
-
-###
-
-GET http://127.0.0.1:8000/hello/User
-Accept: application/json
-
-###
-
+### get annotated cat image
 POST http://127.0.0.1:8000/annotate
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
@@ -17,10 +6,11 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="cat3.jpg"
 Content-Type: image/jpeg
 
-< /Users/daniel/Projects/cat_picture_service/FastAPIProject/data/cat9.jpg
+< data/cat10.jpg
 
 --WebAppBoundary
-###
+
+### crop image of cats using landmarks
 
 POST http://127.0.0.1:8000/crop
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -29,21 +19,37 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="cat1.jpg"
 Content-Type: image/jpeg
 
-< /Users/daniel/Projects/cat_picture_service/FastAPIProject/data/cat5.jpg
+< data/cat1.jpg
 
 --WebAppBoundary
-###
 
-###
+> {% client.global.set("img_url", response.body.images[0]);%}
 
+### get cropped image
+
+GET {{img_url}}
+
+
+
+
+### Align cat faces
 POST http://127.0.0.1:8000/align_face
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
-Content-Disposition: form-data; name="file"; filename="cat.jpg"
+Content-Disposition: form-data; name="file"; filename="cat10.jpg"
 Content-Type: image/jpeg
 
-< /Users/daniel/Projects/cat_picture_service/FastAPIProject/data/cat8.jpg
+< data/cat10.jpg
+--WebAppBoundary--
 
---WebAppBoundary
-###
+> {% client.global.set("img_url", response.body.images[0]);
+  client.global.set("img_url_2", response.body.images[1]); %}
+
+
+
+### show first aligned cat face
+GET {{img_url}}
+
+### show second aligned cat face
+GET {{img_url_2}}
