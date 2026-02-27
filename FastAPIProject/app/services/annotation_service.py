@@ -12,10 +12,13 @@ from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 
-def _annotate_image(image: PIL.Image.Image, landmarks:torch.Tensor):
+def _annotate_image(image: PIL.Image.Image, landmarks:torch.Tensor|list[torch.Tensor]):
     fig, ax = plt.subplots()
     ax.imshow(image)
-    ax.scatter(landmarks[:, 0], landmarks[:, 1])
+    if type(landmarks) is torch.Tensor:
+        landmarks = [landmarks]
+    for landmark in landmarks:
+        ax.scatter(landmark[:, 0], landmark[:, 1])
     ax.axis("off")
     return fig
 

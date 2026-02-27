@@ -1,5 +1,3 @@
-import json
-import os
 from pathlib import Path
 from typing import Type
 
@@ -11,27 +9,10 @@ from models.model import ResNetModel
 from models.model_heatmap import ResNetHeatmap
 import torchvision.transforms as T
 
-_IMAGE_SIZE = (224, 224)
-_LANDMARK_COORD_SHAPE = (9, 2)
-_MODEL_REGISTRY_PATH = Path(__file__).resolve().parent.parent.parent.parent.joinpath("model_registry").resolve()
+from models.utils import load_model_dict, LANDMARK_COORD_SHAPE, IMAGE_SIZE, load_best_model, scale_landmarks_to_original
 
 
 class ModelWrapper:
-    @staticmethod
-    def _load_model_dict(checkpoint_str: str) -> dict:
-        path = os.path.join(_MODEL_REGISTRY_PATH, checkpoint_str)
-        path = os.path.join(path, "run.json")
-        with open(path, "r") as f:
-            return json.load(f)
-
-    @staticmethod
-    def _load_best_model(model_path: str, model: Type[nn.Module]):
-        model_filename = "model.pt"
-        path = os.path.join(model_path, model_filename)
-        state_dict = torch.load(path, map_location=torch.device("cpu"))
-        model = model(_LANDMARK_COORD_SHAPE)
-        model.load_state_dict(state_dict)
-        return model
 
     @staticmethod
     def _get_model_type(model_type: str) -> Type[nn.Module]:
@@ -43,35 +24,30 @@ class ModelWrapper:
             raise NotImplementedError(f"Loading of model type {model_type} is not implemented")
 
     def __init__(self, model_path: str):
-        self.model_dict = ModelWrapper._load_model_dict(model_path)
+        self.model_dict = load_model_dict(model_path)
         self.model_type_str = self.model_dict["model_name"]
         self.model_type = ModelWrapper._get_model_type(self.model_type_str)
-        self.model = self._load_best_model(model_path,
-                                           model=self.model_type if self.model_type_str == "landmark" else ResNetHeatmap)
+        self.model = load_best_model(model_path,
+                      self.model_type if self.model_type_str == "landmark" else ResNetHeatmap,
+                      LANDMARK_COORD_SHAPE)
         self.model.eval()
 
     def __call__(self, image: Image.Image) -> torch.Tensor:
-        rescaled_image = image.resize(_IMAGE_SIZE)
+        rescaled_image = image.resize(IMAGE_SIZE)
         image_tensor = T.ToTensor()(rescaled_image).unsqueeze(0)
         with torch.no_grad():
             y = self.model(image_tensor).squeeze(0)
         if self.model_type_str == "resnet18_heatmap":
             rescaled_coords = ModelWrapper._find_most_likely_normalized_coord(y)
-            normalized_landmarks = ModelWrapper._normalize_landmarks(rescaled_coords, _IMAGE_SIZE)
+            normalized_landmarks = ModelWrapper._normalize_landmarks(rescaled_coords, IMAGE_SIZE)
         elif self.model_type_str == "resnet18":
             normalized_landmarks = y
         else:
             raise NotImplementedError(f"model type {self.model_type_str} is not implemented")
-        final_coords = ModelWrapper._scale_landmarks_to_original(normalized_landmarks, image.size)
+        final_coords = scale_landmarks_to_original(normalized_landmarks, image.size)
         return final_coords
 
-    @staticmethod
-    def _scale_landmarks_to_original(normalized_landmarks: torch.Tensor,
-                                     image_size: tuple[int, int]) -> torch.Tensor:
-        landmarks = torch.zeros_like(normalized_landmarks)
-        landmarks[:, 0] = normalized_landmarks[:, 0] * image_size[0]
-        landmarks[:, 1] = normalized_landmarks[:, 1] * image_size[1]
-        return landmarks
+
 
     @staticmethod
     def _find_most_likely_normalized_coord(hm) -> torch.Tensor:
