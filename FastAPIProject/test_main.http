@@ -53,3 +53,35 @@ GET {{img_url}}
 
 ### show second aligned cat face
 GET {{img_url_2}}
+
+### show cat similarity using two unseen pictures of the same cat
+POST http://127.0.0.1:8000/similarity
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="image_1"; filename="cat1.jpg"
+Content-Type: image/jpeg
+
+< data/cat11.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="image_2"; filename="cat2.jpg"
+Content-Type: image/jpeg
+
+< data/cat12.jpg
+--WebAppBoundary--
+
+### show cat similarity using two unseen pictures of different cats
+POST http://127.0.0.1:8000/similarity
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="image_1"; filename="cat1.jpg"
+Content-Type: image/jpeg
+
+< data/cat6.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="image_2"; filename="cat2.jpg"
+Content-Type: image/jpeg
+
+< data/cat11.jpg
+--WebAppBoundary--
