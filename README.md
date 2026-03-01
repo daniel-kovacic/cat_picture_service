@@ -1,4 +1,4 @@
-#cat_picture_service
+# cat_picture_service
 
 An experimental machine learning pipeline for distinguishing individual cats using facial features.
 
