@@ -1,5 +1,6 @@
 from io import BytesIO
 
+import torch
 from PIL import Image
 from fastapi import UploadFile, File
 from matplotlib import pyplot as plt
@@ -24,3 +25,11 @@ def read_image(file:UploadFile = File(...)):
     return Image.open(BytesIO(image_bytes))
 
 
+def get_device():
+    if torch.cuda.is_available():
+        device_str = "cuda"
+    elif torch.mps.is_available():
+        device_str = "mps"
+    else:
+        device_str = "cpu"
+    return torch.device(device_str)

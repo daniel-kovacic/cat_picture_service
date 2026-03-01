@@ -5,6 +5,7 @@ from PIL import Image
 import torch
 from torch import nn
 
+from core.util import get_device
 from models.model import ResNetModel
 from models.model_heatmap import ResNetHeatmap
 import torchvision.transforms as T
@@ -34,7 +35,7 @@ class ModelWrapper:
 
     def __call__(self, image: Image.Image) -> torch.Tensor:
         rescaled_image = image.resize(IMAGE_SIZE)
-        image_tensor = T.ToTensor()(rescaled_image).unsqueeze(0)
+        image_tensor = T.ToTensor()(rescaled_image).unsqueeze(0).to(get_device())
         with torch.no_grad():
             y = self.model(image_tensor).squeeze(0)
         if self.model_type_str == "resnet18_heatmap":

@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 import torch.nn.functional as F
 import torchvision.models as models
@@ -51,6 +52,7 @@ class CombinedClassifier(nn.Module):
     def __init__(self, num_classes, emb_dim=256, s=64.0, m=0.5, pretrained=True):
         super().__init__()
         self.embedder = CatEmbedder(emb_dim, pretrained=pretrained)
+        print(emb_dim, num_classes)
         self.head = ArcFace(emb_dim, num_classes, s=s, m=m)
 
     def forward(self, x, labels=None):

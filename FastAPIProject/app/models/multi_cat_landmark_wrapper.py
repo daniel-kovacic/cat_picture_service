@@ -6,6 +6,7 @@ from PIL import Image
 import torch
 from torch import nn
 
+from core.util import get_device
 from models.model_heatmap import ResNetHeatmap
 import torchvision.transforms as T
 
@@ -25,6 +26,7 @@ class MultiCatModelWrapper:
         self.model_dict = load_model_dict(model_path)
         self.model_type = MultiCatModelWrapper._get_model_type(self.model_dict["model_name"])
         self.model = load_best_model(model_path, ResNetHeatmap, LANDMARK_COORD_SHAPE)
+        self.model.to(get_device())
         self.model.eval()
         self.peak_threshold = peak_threshold
 
@@ -32,14 +34,13 @@ class MultiCatModelWrapper:
 
     def __call__(self, image: Image.Image) -> list[NDArray]:
         rescaled_image = image.resize(IMAGE_SIZE)
-        image_tensor = T.ToTensor()(rescaled_image).unsqueeze(0)
+        image_tensor = T.ToTensor()(rescaled_image).unsqueeze(0).to(get_device())
         with torch.no_grad():
             y_hat = self.model(image_tensor).squeeze(0)
         landmarks = PeakUtils.extract_cats_from_heatmap(
             y_hat, peak_threshold=self.peak_threshold,
             pool_kernel=15, max_peaks_per_channel=10, max_nose_to_landmark_scale=2.5
         )
-        print(landmarks)
         landmarks = [landmark[:,:2] for landmark in landmarks]
         landmarks_np = [landmark.cpu().numpy().astype(np.float32) for landmark in landmarks]
         final_coords = [scale_landmarks_to_original(landmark, image.size)

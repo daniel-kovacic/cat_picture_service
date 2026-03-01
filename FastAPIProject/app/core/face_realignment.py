@@ -29,7 +29,7 @@ def get_ref_pts():
                           _rescale_coord(RELATIVE_PADDING_Y[0] + RELATIVE_DIST_EYE_NOSE[1], 1)])
    return left_eye_coord, right_eye_coord, nose_coord
 
-def align_face(image:Image.Image, src_pts):
+def align_face(image:Image.Image, src_pts)->Image.Image:
     image = np.array(image)
     dst_pts = np.array(get_ref_pts())
 
