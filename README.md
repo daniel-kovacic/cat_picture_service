@@ -180,7 +180,7 @@ Make sure Git LFS is installed before cloning:
 
 ```bash
 git lfs install
-git clone <repo>
+git clone https://github.com/daniel-kovacic/cat_picture_service.git
 ```
 
 ---
